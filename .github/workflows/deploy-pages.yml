@@ -30,7 +30,7 @@ jobs:
       - name: Build
         env:
           GITHUB_PAGES: true
-        run: bun run build
+        run: bun run prebuild && bunx vite build
 
       - uses: actions/upload-pages-artifact@v3
         with:
