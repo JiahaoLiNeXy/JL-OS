@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandResult } from "../types";
-import { appIds, AppId } from "@/config/appIds";
+import { allAppIds, AppId } from "@/config/appRegistryData";
 import { useFilesStore } from "@/stores/useFilesStore";
 import {
   dbOperations,
@@ -51,7 +51,7 @@ function getAppId(name: string): AppId | null {
   const lowerName = name.toLowerCase();
   
   // Direct match with app IDs
-  if (appIds.includes(lowerName as AppId)) {
+  if (allAppIds.includes(lowerName as AppId)) {
     return lowerName as AppId;
   }
   
@@ -61,7 +61,7 @@ function getAppId(name: string): AppId | null {
   }
   
   // Try partial matching for app IDs
-  const partialMatch = appIds.find(id => 
+  const partialMatch = allAppIds.find(id =>
     id.includes(lowerName) || lowerName.includes(id.replace("-", ""))
   );
   if (partialMatch) {
@@ -281,6 +281,5 @@ async function openFile(
     isError: false,
   };
 }
-
 
 

@@ -19,6 +19,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "downlevelIteration": true,
+    "types": ["vite/client"],
 
     /* Linting */
     "strict": true,

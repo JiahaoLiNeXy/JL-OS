@@ -7,11 +7,34 @@
  * Exits both processes on Ctrl+C.
  */
 
-const API_PORT = process.env.API_PORT ?? "3000";
-// Bun auto-loads .env.local which may set PORT=3000 (used by the API).
-// The Vite dev server needs a separate port to avoid conflicts.
-const VITE_PORT = process.env.VITE_PORT ?? "5173";
-const PORT = VITE_PORT === API_PORT ? "5173" : VITE_PORT;
+import net from "node:net";
+
+async function findAvailablePort(preferredPort: number): Promise<number> {
+  const maxAttempts = 20;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const port = preferredPort + attempt;
+    const available = await new Promise<boolean>((resolve) => {
+      const server = net.createServer();
+      server.unref();
+      server.on("error", () => resolve(false));
+      server.listen(port, () => {
+        server.close(() => resolve(true));
+      });
+    });
+
+    if (available) {
+      return port;
+    }
+  }
+
+  throw new Error(`Unable to find an open port near ${preferredPort}.`);
+}
+
+const preferredApiPort = Number(process.env.API_PORT ?? "3000");
+const preferredVitePort = Number(process.env.VITE_PORT ?? process.env.PORT ?? "5173");
+const API_PORT = String(await findAvailablePort(preferredApiPort));
+const PORT = String(await findAvailablePort(preferredVitePort === Number(API_PORT) ? preferredVitePort + 1 : preferredVitePort));
 
 const api = Bun.spawn(
   ["bun", "run", "dev:api"],

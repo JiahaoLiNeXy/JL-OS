@@ -74,6 +74,8 @@ export function useIpodLogic({
     isPlaying,
     showVideo,
     backlightOn,
+    libraryState,
+    initializeLibrary,
   } = useIpodStore(
     useShallow((s) => ({
       tracks: s.tracks,
@@ -84,8 +86,15 @@ export function useIpodLogic({
       isPlaying: s.isPlaying,
       showVideo: s.showVideo,
       backlightOn: s.backlightOn,
+      libraryState: s.libraryState,
+      initializeLibrary: s.initializeLibrary,
     }))
   );
+
+  useEffect(() => {
+    if (!isWindowOpen || libraryState !== "uninitialized") return;
+    void initializeLibrary();
+  }, [initializeLibrary, isWindowOpen, libraryState]);
 
   // Compute currentIndex from currentSongId
   const currentIndex = useMemo(() => {

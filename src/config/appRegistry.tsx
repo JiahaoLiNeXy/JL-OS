@@ -1,14 +1,19 @@
-import { type AppId } from "./appRegistryData";
+import {
+  disabledAppIds,
+  isActiveAppId,
+  type AppId,
+} from "./appRegistryData";
 import type {
+  AppProps,
   BaseApp,
   ControlPanelsInitialData,
   InternetExplorerInitialData,
   IpodInitialData,
-  PaintInitialData,
   VideosInitialData,
 } from "@/apps/base/types";
 import type { AppletViewerInitialData } from "@/apps/applet-viewer";
 import { createLazyComponent } from "./lazyAppComponent";
+import { WindowFrame } from "@/components/layout/WindowFrame";
 
 export type { AppId };
 
@@ -32,28 +37,48 @@ const defaultWindowConstraints: WindowConstraints = {
   minSize: { width: 300, height: 200 },
 };
 
+function LegacyUnavailableApp({
+  isWindowOpen,
+  onClose,
+  isForeground,
+  skipInitialSound,
+  instanceId,
+  title,
+}: AppProps) {
+  if (!isWindowOpen) return null;
+
+  return (
+    <WindowFrame
+      title={title ?? "Unavailable App"}
+      onClose={onClose}
+      isForeground={isForeground}
+      appId="finder"
+      skipInitialSound={skipInitialSound}
+      instanceId={instanceId}
+    >
+      <div className="flex h-full items-center justify-center bg-[#eef1f4] p-8 text-center text-[14px] text-black/70">
+        This app has been removed from the JL OS portfolio build.
+      </div>
+    </WindowFrame>
+  );
+}
+
 // ============================================================================
 // LAZY-LOADED APP COMPONENTS
 // ============================================================================
 
 // Critical apps (load immediately for perceived performance)
-// Finder is critical - users see it on desktop
-import { FinderAppComponent } from "@/apps/finder/components/FinderAppComponent";
+import { PortfolioProjectsApp } from "@/portfolio/apps/PortfolioProjectsApp";
 
 // Lazy-loaded apps (loaded on-demand when opened)
 // Each uses a cache key to maintain stable references across HMR
-const LazyTextEditApp = createLazyComponent<unknown>(
-  () => import("@/apps/textedit/components/TextEditAppComponent").then(m => ({ default: m.TextEditAppComponent })),
-  "textedit"
-);
-
 const LazyInternetExplorerApp = createLazyComponent<InternetExplorerInitialData>(
   () => import("@/apps/internet-explorer/components/InternetExplorerAppComponent").then(m => ({ default: m.InternetExplorerAppComponent })),
   "internet-explorer"
 );
 
 const LazyChatsApp = createLazyComponent<unknown>(
-  () => import("@/apps/chats/components/ChatsAppComponent").then(m => ({ default: m.ChatsAppComponent })),
+  () => import("@/portfolio/apps/TalkToJLApp").then(m => ({ default: m.TalkToJLApp })),
   "chats"
 );
 
@@ -72,39 +97,14 @@ const LazySoundboardApp = createLazyComponent<unknown>(
   "soundboard"
 );
 
-const LazyPaintApp = createLazyComponent<PaintInitialData>(
-  () => import("@/apps/paint/components/PaintAppComponent").then(m => ({ default: m.PaintAppComponent })),
-  "paint"
-);
-
 const LazyVideosApp = createLazyComponent<VideosInitialData>(
   () => import("@/apps/videos/components/VideosAppComponent").then(m => ({ default: m.VideosAppComponent })),
   "videos"
 );
 
-const LazyPcApp = createLazyComponent<unknown>(
-  () => import("@/apps/pc/components/PcAppComponent").then(m => ({ default: m.PcAppComponent })),
-  "pc"
-);
-
-const LazyPhotoBoothApp = createLazyComponent<unknown>(
-  () => import("@/apps/photo-booth/components/PhotoBoothComponent").then(m => ({ default: m.PhotoBoothComponent })),
-  "photo-booth"
-);
-
-const LazySynthApp = createLazyComponent<unknown>(
-  () => import("@/apps/synth/components/SynthAppComponent").then(m => ({ default: m.SynthAppComponent })),
-  "synth"
-);
-
 const LazyIpodApp = createLazyComponent<IpodInitialData>(
   () => import("@/apps/ipod/components/IpodAppComponent").then(m => ({ default: m.IpodAppComponent })),
   "ipod"
-);
-
-const LazyKaraokeApp = createLazyComponent<IpodInitialData>(
-  () => import("@/apps/karaoke/components/KaraokeAppComponent").then(m => ({ default: m.KaraokeAppComponent })),
-  "karaoke"
 );
 
 const LazyTerminalApp = createLazyComponent<unknown>(
@@ -113,7 +113,7 @@ const LazyTerminalApp = createLazyComponent<unknown>(
 );
 
 const LazyAppletViewerApp = createLazyComponent<AppletViewerInitialData>(
-  () => import("@/apps/applet-viewer/components/AppletViewerAppComponent").then(m => ({ default: m.AppletViewerAppComponent })),
+  () => import("@/portfolio/apps/AppletUtilityStoreApp").then(m => ({ default: m.AppletUtilityStoreApp })),
   "applet-viewer"
 );
 
@@ -123,18 +123,8 @@ const LazyAdminApp = createLazyComponent<unknown>(
 );
 
 const LazyStickiesApp = createLazyComponent<unknown>(
-  () => import("@/apps/stickies/components/StickiesAppComponent").then(m => ({ default: m.StickiesAppComponent })),
+  () => import("@/portfolio/apps/PortfolioNotesApp").then(m => ({ default: m.PortfolioNotesApp })),
   "stickies"
-);
-
-const LazyInfiniteMacApp = createLazyComponent<unknown>(
-  () => import("@/apps/infinite-mac/components/InfiniteMacAppComponent").then(m => ({ default: m.InfiniteMacAppComponent })),
-  "infinite-mac"
-);
-
-const LazyWinampApp = createLazyComponent<unknown>(
-  () => import("@/apps/winamp/components/WinampAppComponent").then(m => ({ default: m.WinampAppComponent })),
-  "winamp"
 );
 
 const LazyCalendarApp = createLazyComponent<unknown>(
@@ -147,16 +137,6 @@ const LazyContactsApp = createLazyComponent<unknown>(
   "contacts"
 );
 
-const LazyDashboardApp = createLazyComponent<unknown>(
-  () => import("@/apps/dashboard/components/DashboardAppComponent").then(m => ({ default: m.DashboardAppComponent })),
-  "dashboard"
-);
-
-const LazyCandyBarApp = createLazyComponent<unknown>(
-  () => import("@/apps/candybar/components/CandyBarAppComponent").then(m => ({ default: m.CandyBarAppComponent })),
-  "candybar"
-);
-
 // ============================================================================
 // APP METADATA (loaded eagerly - small, isolated from components)
 // Import from metadata.ts files to avoid eager loading of components
@@ -166,48 +146,34 @@ import { appMetadata as finderMetadata, helpItems as finderHelpItems } from "@/a
 import { appMetadata as soundboardMetadata, helpItems as soundboardHelpItems } from "@/apps/soundboard/metadata";
 import { appMetadata as internetExplorerMetadata, helpItems as internetExplorerHelpItems } from "@/apps/internet-explorer/metadata";
 import { appMetadata as chatsMetadata, helpItems as chatsHelpItems } from "@/apps/chats/metadata";
-import { appMetadata as texteditMetadata, helpItems as texteditHelpItems } from "@/apps/textedit/metadata";
-import { appMetadata as paintMetadata, helpItems as paintHelpItems } from "@/apps/paint";
-import { appMetadata as photoboothMetadata, helpItems as photoboothHelpItems } from "@/apps/photo-booth/metadata";
 import { appMetadata as minesweeperMetadata, helpItems as minesweeperHelpItems } from "@/apps/minesweeper";
 import { appMetadata as videosMetadata, helpItems as videosHelpItems } from "@/apps/videos/metadata";
 import { appMetadata as ipodMetadata, helpItems as ipodHelpItems } from "@/apps/ipod/metadata";
-import { appMetadata as karaokeMetadata, helpItems as karaokeHelpItems } from "@/apps/karaoke/metadata";
-import { appMetadata as synthMetadata, helpItems as synthHelpItems } from "@/apps/synth/metadata";
-import { appMetadata as pcMetadata, helpItems as pcHelpItems } from "@/apps/pc/metadata";
 import { appMetadata as terminalMetadata, helpItems as terminalHelpItems } from "@/apps/terminal";
 import { appMetadata as appletViewerMetadata, helpItems as appletViewerHelpItems } from "@/apps/applet-viewer";
 import { appMetadata as controlPanelsMetadata, helpItems as controlPanelsHelpItems } from "@/apps/control-panels";
 import { appMetadata as adminMetadata, helpItems as adminHelpItems } from "@/apps/admin/metadata";
 import { appMetadata as stickiesMetadata, helpItems as stickiesHelpItems } from "@/apps/stickies";
-import {
-  appMetadata as infiniteMacMetadata,
-  helpItems as infiniteMacHelpItems,
-} from "@/apps/infinite-mac/metadata";
-import { appMetadata as winampMetadata, helpItems as winampHelpItems } from "@/apps/winamp";
 import { appMetadata as calendarMetadata, helpItems as calendarHelpItems } from "@/apps/calendar/metadata";
 import { appMetadata as contactsMetadata, helpItems as contactsHelpItems } from "@/apps/contacts";
-import { appMetadata as dashboardMetadata, helpItems as dashboardHelpItems } from "@/apps/dashboard/metadata";
-import { appMetadata as candybarMetadata, helpItems as candybarHelpItems } from "@/apps/candybar/metadata";
-import { DEFAULT_WINDOW_SIZE_WITH_TITLEBAR as infiniteMacDefaultSize } from "@/apps/infinite-mac/hooks/useInfiniteMacLogic";
 
 // ============================================================================
 // APP REGISTRY
 // ============================================================================
 
 // Registry of all available apps with their window configurations
-export const appRegistry = {
+const activeAppRegistry = {
   ["finder"]: {
     id: "finder",
     name: "Finder",
     icon: { type: "image", src: "/icons/mac.png" },
     description: "Browse and manage files",
-    component: FinderAppComponent, // Critical - loaded eagerly
+    component: PortfolioProjectsApp,
     helpItems: finderHelpItems,
     metadata: finderMetadata,
     windowConfig: {
-      defaultSize: { width: 680, height: 400 },
-      minSize: { width: 300, height: 200 },
+      defaultSize: { width: 860, height: 860 },
+      minSize: { width: 640, height: 600 },
     } as WindowConstraints,
   },
   ["soundboard"]: {
@@ -247,47 +213,6 @@ export const appRegistry = {
     windowConfig: {
       defaultSize: { width: 560, height: 360 },
       minSize: { width: 300, height: 320 },
-    } as WindowConstraints,
-  },
-  ["textedit"]: {
-    id: "textedit",
-    name: "TextEdit",
-    icon: { type: "image", src: texteditMetadata.icon },
-    description: "A simple rich text editor",
-    component: LazyTextEditApp,
-    helpItems: texteditHelpItems,
-    metadata: texteditMetadata,
-    windowConfig: {
-      defaultSize: { width: 430, height: 475 },
-      minSize: { width: 430, height: 200 },
-    } as WindowConstraints,
-  },
-  ["paint"]: {
-    id: "paint",
-    name: "Paint",
-    icon: { type: "image", src: paintMetadata.icon },
-    description: "Draw and edit images",
-    component: LazyPaintApp,
-    helpItems: paintHelpItems,
-    metadata: paintMetadata,
-    windowConfig: {
-      defaultSize: { width: 713, height: 480 },
-      minSize: { width: 400, height: 400 },
-      maxSize: { width: 713, height: 535 },
-    } as WindowConstraints,
-  } as BaseApp<PaintInitialData> & { windowConfig: WindowConstraints },
-  ["photo-booth"]: {
-    id: "photo-booth",
-    name: "Photo Booth",
-    icon: { type: "image", src: photoboothMetadata.icon },
-    description: "Take photos with effects",
-    component: LazyPhotoBoothApp,
-    helpItems: photoboothHelpItems,
-    metadata: photoboothMetadata,
-    windowConfig: {
-      defaultSize: { width: 644, height: 510 },
-      minSize: { width: 644, height: 510 },
-      maxSize: { width: 644, height: 510 },
     } as WindowConstraints,
   },
   ["minesweeper"]: {
@@ -330,47 +255,6 @@ export const appRegistry = {
       minSize: { width: 300, height: 480 },
     } as WindowConstraints,
   } as BaseApp<IpodInitialData> & { windowConfig: WindowConstraints },
-  ["karaoke"]: {
-    id: "karaoke",
-    name: "Karaoke",
-    icon: { type: "image", src: karaokeMetadata.icon },
-    description: "Karaoke player with synced lyrics",
-    component: LazyKaraokeApp,
-    helpItems: karaokeHelpItems,
-    metadata: karaokeMetadata,
-    windowConfig: {
-      defaultSize: { width: 560, height: 560 },
-      minSize: { width: 400, height: 300 },
-      mobileSquare: true,
-    } as WindowConstraints,
-  } as BaseApp<IpodInitialData> & { windowConfig: WindowConstraints },
-  ["synth"]: {
-    id: "synth",
-    name: "Synth",
-    icon: { type: "image", src: synthMetadata.icon },
-    description: "Virtual synthesizer",
-    component: LazySynthApp,
-    helpItems: synthHelpItems,
-    metadata: synthMetadata,
-    windowConfig: {
-      defaultSize: { width: 720, height: 400 },
-      minSize: { width: 720, height: 290 },
-    } as WindowConstraints,
-  },
-  ["pc"]: {
-    id: "pc",
-    name: "Virtual PC",
-    icon: { type: "image", src: pcMetadata.icon },
-    description: "3D PC simulation",
-    component: LazyPcApp,
-    helpItems: pcHelpItems,
-    metadata: pcMetadata,
-    windowConfig: {
-      defaultSize: { width: 645, height: 511 },
-      minSize: { width: 645, height: 511 },
-      maxSize: { width: 645, height: 511 },
-    } as WindowConstraints,
-  },
   ["terminal"]: {
     id: "terminal",
     name: "Terminal",
@@ -438,33 +322,6 @@ export const appRegistry = {
       minSize: { width: 300, height: 250 },
     } as WindowConstraints,
   },
-  ["infinite-mac"]: {
-    id: "infinite-mac",
-    name: "Infinite Mac",
-    icon: { type: "image", src: infiniteMacMetadata.icon },
-    description: "Classic Mac OS emulators",
-    component: LazyInfiniteMacApp,
-    helpItems: infiniteMacHelpItems,
-    metadata: infiniteMacMetadata,
-    windowConfig: {
-      defaultSize: infiniteMacDefaultSize,
-      minSize: { width: 512, height: 342 },
-      maxSize: { width: 1024, height: 792 }, // 768 + 24 for macOS X titlebar spacer
-    } as WindowConstraints,
-  },
-  ["winamp"]: {
-    id: "winamp",
-    name: "Winamp",
-    icon: { type: "image", src: winampMetadata.icon },
-    description: "Classic Winamp media player",
-    component: LazyWinampApp,
-    helpItems: winampHelpItems,
-    metadata: winampMetadata,
-    windowConfig: {
-      defaultSize: { width: 275, height: 116 },
-      minSize: { width: 275, height: 116 },
-    } as WindowConstraints,
-  },
   ["calendar"]: {
     id: "calendar",
     name: "Calendar",
@@ -491,32 +348,53 @@ export const appRegistry = {
       minSize: { width: 360, height: 420 },
     } as WindowConstraints,
   },
-  ["dashboard"]: {
-    id: "dashboard",
-    name: "Dashboard",
-    icon: { type: "image", src: dashboardMetadata.icon },
-    description: "Widget dashboard overlay",
-    component: LazyDashboardApp,
-    helpItems: dashboardHelpItems,
-    metadata: dashboardMetadata,
-    windowConfig: {
-      defaultSize: { width: 500, height: 400 },
-      minSize: { width: 300, height: 250 },
-    } as WindowConstraints,
-  },
-  ["candybar"]: {
-    id: "candybar",
-    name: "CandyBar",
-    icon: { type: "image", src: candybarMetadata.icon },
-    description: "Browse and apply icon packs",
-    component: LazyCandyBarApp,
-    helpItems: candybarHelpItems,
-    metadata: candybarMetadata,
-    windowConfig: {
-      defaultSize: { width: 680, height: 460 },
-      minSize: { width: 500, height: 350 },
-    } as WindowConstraints,
-  },
+} as const;
+
+const disabledAppRegistry = Object.fromEntries(
+  disabledAppIds.map((id) => [
+    id,
+    {
+      id,
+      name:
+        id === "textedit"
+          ? "TextEdit"
+          : id === "photo-booth"
+            ? "Photo Booth"
+            : id === "pc"
+              ? "PC"
+              : id
+                  .split("-")
+                  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                  .join(" "),
+      icon: {
+        type: "image" as const,
+        src:
+          id === "infinite-mac"
+            ? "/icons/default/infinite-mac.png"
+            : id === "photo-booth"
+              ? "/icons/default/photo-booth.png"
+              : id === "dashboard"
+                ? "/icons/default/dashboard.png"
+                : id === "candybar"
+                  ? "/icons/default/candybar.png"
+                  : `/icons/default/${id}.png`,
+      },
+      description: "Unavailable in JL OS portfolio build",
+      component: LegacyUnavailableApp,
+      helpItems: [],
+      metadata: undefined,
+      windowConfig: defaultWindowConstraints,
+      disabled: true,
+    },
+  ]),
+) as unknown as Record<
+  (typeof disabledAppIds)[number],
+  BaseApp & { windowConfig: WindowConstraints; disabled: true }
+>;
+
+export const appRegistry = {
+  ...activeAppRegistry,
+  ...disabledAppRegistry,
 } as const;
 
 // ============================================================================
@@ -541,6 +419,7 @@ export const getNonFinderApps = (isAdmin: boolean = false): Array<{
 }> => {
   return Object.entries(appRegistry)
     .filter(([id, app]) => {
+      if (!isActiveAppId(id as AppId)) return false;
       if (id === "finder") return false;
       // Filter out admin-only apps for non-admin users
       if ((app as { adminOnly?: boolean }).adminOnly && !isAdmin) return false;

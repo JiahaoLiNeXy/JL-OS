@@ -9,29 +9,42 @@ export const appIds = [
   "soundboard",
   "internet-explorer",
   "chats",
-  "textedit",
-  "paint",
-  "photo-booth",
   "minesweeper",
   "videos",
   "ipod",
-  "karaoke",
-  "synth",
-  "pc",
   "terminal",
   "applet-viewer",
   "control-panels",
   "admin",
   "stickies",
-  "infinite-mac",
-  "winamp",
   "calendar",
   "contacts",
+] as const;
+
+export const disabledAppIds = [
+  "textedit",
+  "paint",
+  "pc",
+  "photo-booth",
+  "synth",
+  "karaoke",
+  "infinite-mac",
+  "winamp",
   "dashboard",
   "candybar",
 ] as const;
 
-export type AppId = (typeof appIds)[number];
+export const allAppIds = [...appIds, ...disabledAppIds] as const;
+
+export type ActiveAppId = (typeof appIds)[number];
+export type DisabledAppId = (typeof disabledAppIds)[number];
+export type AppId = ActiveAppId | DisabledAppId;
+
+const activeAppIdLookup = new Set<string>(appIds);
+
+export function isActiveAppId(appId: AppId): appId is ActiveAppId {
+  return activeAppIdLookup.has(appId);
+}
 
 /** Minimal app data for stores that don't need full registry */
 export interface AppBasicInfo {
@@ -45,26 +58,26 @@ export const appNames: Record<AppId, string> = {
   "soundboard": "Soundboard",
   "internet-explorer": "Internet Explorer",
   "chats": "Chats",
-  "textedit": "TextEdit",
-  "paint": "Paint",
-  "photo-booth": "Photo Booth",
   "minesweeper": "Minesweeper",
   "videos": "Videos",
   "ipod": "iPod",
-  "karaoke": "Karaoke",
-  "synth": "Synth",
-  "pc": "Virtual PC",
   "terminal": "Terminal",
   "applet-viewer": "Applet Store",
   "control-panels": "Control Panels",
   "admin": "Admin",
   "stickies": "Stickies",
-  "infinite-mac": "Infinite Mac",
-  "winamp": "Winamp",
   "calendar": "Calendar",
   "contacts": "Contacts",
+  "textedit": "TextEdit",
+  "paint": "Paint",
+  "pc": "PC",
+  "photo-booth": "Photo Booth",
+  "synth": "Synth",
+  "karaoke": "Karaoke",
+  "infinite-mac": "Infinite Mac",
+  "winamp": "Winamp",
   "dashboard": "Dashboard",
-  "candybar": "CandyBar",
+  "candybar": "Candybar",
 };
 
 /** Get list of apps with basic info for stores */

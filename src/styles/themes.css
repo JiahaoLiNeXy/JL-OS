@@ -847,8 +847,8 @@
   font-size: 12px !important;
 }
 
-:root[data-os-theme="macosx"] p:where(:not(.dashboard-overlay *):not(.calendar-grid *):not(.os-sidebar *):not(.ipod-force-font *):not(.karaoke-force-font *):not(.admin-force-font *)),
-:root[data-os-theme="macosx"] div:where(:not(.dashboard-overlay *):not(.calendar-grid *):not(.os-sidebar *):not(.ipod-force-font *):not(.karaoke-force-font *):not(.admin-force-font *)) {
+:root[data-os-theme="macosx"] p:where(:not(.dashboard-overlay *):not(.calendar-grid *):not(.os-sidebar *):not(.ipod-force-font *):not(.karaoke-force-font *):not(.admin-force-font *):not(.cover-force-font):not(.cover-force-font *)),
+:root[data-os-theme="macosx"] div:where(:not(.dashboard-overlay *):not(.calendar-grid *):not(.os-sidebar *):not(.ipod-force-font *):not(.karaoke-force-font *):not(.admin-force-font *):not(.cover-force-font):not(.cover-force-font *)) {
   font-size: 13px !important;
 }
 
@@ -1923,11 +1923,6 @@
 :root[data-os-theme="macosx"] [role="menuitemradio"],
 :root[data-os-theme="macosx"] [role="option"] {
   font-size: 13px !important;
-}
-
-/* Make Apple icon white when menubar trigger is open */
-:root[data-os-theme="macosx"] [data-state="open"] img[alt="Apple Menu"] {
-  filter: brightness(0) invert(1) !important;
 }
 
 /* Enhanced shadow for macOS foreground windows */

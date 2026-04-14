@@ -30,11 +30,19 @@ import { useGlobalUndoRedo } from "@/hooks/useGlobalUndoRedo";
 
 interface AppManagerProps {
   apps: AnyApp[];
+  /** Override the default Desktop background */
+  customDesktop?: React.ComponentType<{ apps: AnyApp[]; toggleApp: (appId: AppId, initialData?: unknown, launchOrigin?: import("@/stores/useAppStore").LaunchOriginRect) => void }>;
+  /** Override the default MenuBar */
+  customMenuBar?: React.ComponentType;
+  /** Override the default Dock */
+  customDock?: React.ComponentType;
+  /** Override the default SpotlightSearch */
+  customSpotlightSearch?: React.ComponentType;
 }
 
 const BASE_Z_INDEX = 1;
 
-export function AppManager({ apps }: AppManagerProps) {
+export function AppManager({ apps, customDesktop: CustomDesktop, customMenuBar: CustomMenuBar, customDock: CustomDock, customSpotlightSearch: CustomSpotlightSearch }: AppManagerProps) {
   const { t } = useTranslation();
 
   // Instance-based state
@@ -532,9 +540,9 @@ export function AppManager({ apps }: AppManagerProps) {
       {/* MenuBar: For XP/Win98, this is the taskbar (always shown).
           For Mac/System7, hide when a foreground app is loaded since 
           the app renders its own MenuBar. */}
-      {showDesktopMenuBar && <MenuBar />}
+      {CustomMenuBar ? <CustomMenuBar /> : showDesktopMenuBar && <MenuBar />}
       {/* macOS Dock */}
-      <Dock />
+      {CustomDock ? <CustomDock /> : <Dock />}
       {/* App Instances */}
       {Object.values(instances).map((instance) => {
         if (!instance.isOpen) return null;
@@ -637,15 +645,24 @@ export function AppManager({ apps }: AppManagerProps) {
         );
       })}
 
-      <Desktop
-        apps={apps}
-        toggleApp={(appId, initialData, launchOrigin) => {
-          launchApp(appId, initialData, undefined, false, launchOrigin);
-        }}
-      />
+      {CustomDesktop ? (
+        <CustomDesktop
+          apps={apps}
+          toggleApp={(appId, initialData, launchOrigin) => {
+            launchApp(appId, initialData, undefined, false, launchOrigin);
+          }}
+        />
+      ) : (
+        <Desktop
+          apps={apps}
+          toggleApp={(appId, initialData, launchOrigin) => {
+            launchApp(appId, initialData, undefined, false, launchOrigin);
+          }}
+        />
+      )}
 
       {/* Spotlight Search */}
-      <SpotlightSearch />
+      {CustomSpotlightSearch ? <CustomSpotlightSearch /> : <SpotlightSearch />}
 
       {/* Expose View (Mission Control) - Backdrop and labels */}
       <ExposeView

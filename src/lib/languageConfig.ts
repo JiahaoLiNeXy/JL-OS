@@ -1,5 +1,6 @@
 export const SUPPORTED_LANGUAGES = [
   "en",
+  "zh",
   "zh-TW",
   "ja",
   "ko",
@@ -29,7 +30,7 @@ export const isSupportedLanguage = (
 /**
  * Maps a browser locale to our supported languages with fuzzy matching.
  * Examples:
- * - zh, zh-Hans, zh-CN, zh-Hans-CN, zh-Hant, zh-Hant-TW -> zh-TW
+ * - zh, zh-Hans, zh-CN, zh-Hans-CN, zh-Hant, zh-Hant-TW -> zh
  * - ja, ja-JP -> ja
  * - ko, ko-KR -> ko
  * - fr, fr-FR, fr-CA -> fr
@@ -54,9 +55,9 @@ export const detectLanguageFromLocale = (
   // Extract language code (first part before hyphen)
   const langCode = normalizedLocale.split("-")[0];
 
-  // Special case: all Chinese variants map to zh-TW
+  // Special case: all Chinese variants map to zh
   if (langCode === "zh") {
-    return "zh-TW";
+    return "zh";
   }
 
   // Check if language code matches any supported language
@@ -155,6 +156,11 @@ const readPersistedLanguageState = (): PersistedLanguageState => {
       writeStorageValue(LANGUAGE_INITIALIZED_KEY, legacyInitialized);
       removeStorageValue(LEGACY_LANGUAGE_INITIALIZED_KEY);
     }
+  }
+
+  if (savedRaw === "zh-TW") {
+    savedRaw = "zh";
+    writeStorageValue(LANGUAGE_KEY, "zh");
   }
 
   return {

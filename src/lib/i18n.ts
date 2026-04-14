@@ -20,6 +20,7 @@ const resources = {
 };
 
 const localeLoaders: Partial<Record<SupportedLanguage, LocaleLoader>> = {
+  zh: () => import("./locales/zh/translation.json"),
   "zh-TW": () => import("./locales/zh-TW/translation.json"),
   ja: () => import("./locales/ja/translation.json"),
   ko: () => import("./locales/ko/translation.json"),
@@ -157,4 +158,3 @@ export async function applyLanguage(
 }
 
 export default i18n;
-

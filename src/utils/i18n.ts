@@ -1,31 +1,7 @@
 import i18n from "@/lib/i18n";
 import { useThemeStore } from "@/stores/useThemeStore";
-
-export type AppId =
-  | "finder"
-  | "soundboard"
-  | "internet-explorer"
-  | "chats"
-  | "textedit"
-  | "paint"
-  | "photo-booth"
-  | "minesweeper"
-  | "videos"
-  | "ipod"
-  | "karaoke"
-  | "synth"
-  | "pc"
-  | "terminal"
-  | "applet-viewer"
-  | "control-panels"
-  | "admin"
-  | "stickies"
-  | "infinite-mac"
-  | "winamp"
-  | "calendar"
-  | "contacts"
-  | "dashboard"
-  | "candybar";
+import type { AppId } from "@/config/appRegistry";
+export type { AppId } from "@/config/appRegistry";
 
 /**
  * Get translated app name with theme-awareness

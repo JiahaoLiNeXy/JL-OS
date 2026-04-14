@@ -1,5 +1,10 @@
 ## Cloud-specific instructions
 
+This directory is the `ryOS` desktop/reference app. It is not the default public website workspace.
+
+- Only use this app when the task explicitly mentions `ryOS`, `jl-os`, `桌面地球`, `World`, or the desktop portfolio.
+- For default website work, use `../site`.
+
 # ryOS Cloud Environment Guide
 
 ## Development Environment

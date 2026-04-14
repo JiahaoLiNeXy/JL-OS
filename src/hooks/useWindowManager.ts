@@ -5,7 +5,7 @@ import {
   ResizeType,
   ResizeStart,
 } from "../types/types";
-import { appIds, AppId } from "@/config/appIds";
+import { allAppIds, AppId } from "@/config/appRegistryData";
 import { useAppStore } from "@/stores/useAppStore";
 import { useSound, Sounds } from "./useSound";
 import { getWindowConfig, getMobileWindowSize } from "@/config/appRegistry";
@@ -38,7 +38,7 @@ export const useWindowManager = ({
     const isMobile = window.innerWidth < 768;
     const mobileY = 28; // Fixed Y position for mobile to account for menu bar
 
-    const appIndex = appIds.indexOf(appId);
+    const appIndex = allAppIds.indexOf(appId);
     const offsetIndex = appIndex >= 0 ? appIndex : 0;
 
     return {

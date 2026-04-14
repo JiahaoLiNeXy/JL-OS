@@ -3,7 +3,6 @@ import { appRegistry } from "./config/appRegistry";
 import { useEffect, useState, useMemo } from "react";
 import { applyDisplayMode } from "./utils/displayMode";
 import { Toaster } from "./components/ui/sonner";
-import { toast } from "sonner";
 import { useAppStoreShallow, useDisplaySettingsStoreShallow } from "@/stores/helpers";
 import { BootScreen } from "./components/dialogs/BootScreen";
 import { getNextBootMessage, clearNextBootMessage, isBootDebugMode } from "./utils/bootMessage";
@@ -12,9 +11,6 @@ import { useThemeStore } from "./stores/useThemeStore";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useOffline } from "./hooks/useOffline";
 import { useTranslation } from "react-i18next";
-import { isTauri } from "./utils/platform";
-import { checkDesktopUpdate, onDesktopUpdate, DesktopUpdateResult } from "./utils/prefetch";
-import { DownloadSimple } from "@phosphor-icons/react";
 import { ScreenSaverOverlay } from "./components/screensavers/ScreenSaverOverlay";
 import { useBackgroundChatNotifications } from "./hooks/useBackgroundChatNotifications";
 import { DesktopErrorBoundary } from "@/components/errors/ErrorBoundaries";
@@ -22,17 +18,26 @@ import { useAutoCloudSync } from "@/hooks/useAutoCloudSync";
 import { AirDropListener } from "@/components/AirDropListener";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { ReactScanDebug } from "@/components/ReactScanDebug";
+import { CoverPage } from "@/portfolio/components/CoverPage";
+import { PortfolioDesktop } from "@/portfolio/components/PortfolioDesktop";
+import { PortfolioMenuBar } from "@/portfolio/components/PortfolioMenuBar";
+import { PortfolioDock } from "@/portfolio/components/PortfolioDock";
+import { usePortfolioStore } from "@/portfolio/store";
 
 // Convert registry to array
 const apps: AnyApp[] = Object.values(appRegistry);
 
+// Wrapper that adapts PortfolioDesktop to the Desktop component interface
+function PortfolioDesktopWrapper() {
+  return <PortfolioDesktop />;
+}
+
 export function App() {
   const { t } = useTranslation();
-  const { isFirstBoot, setHasBooted, setLastSeenDesktopVersion } = useAppStoreShallow(
+  const { isFirstBoot, setHasBooted } = useAppStoreShallow(
     (state) => ({
       isFirstBoot: state.isFirstBoot,
       setHasBooted: state.setHasBooted,
-      setLastSeenDesktopVersion: state.setLastSeenDesktopVersion,
     })
   );
   const displayMode = useDisplaySettingsStoreShallow((state) => state.displayMode);
@@ -42,6 +47,27 @@ export function App() {
   useOffline();
   useBackgroundChatNotifications();
   useAutoCloudSync();
+
+  // Consume pending project after cover transition completes
+  const isCoverVisible = usePortfolioStore((state) => state.isCoverVisible);
+  const consumePendingProject = usePortfolioStore((state) => state.consumePendingProject);
+
+  useEffect(() => {
+    if (isCoverVisible) return;
+    const slug = consumePendingProject();
+    if (slug) {
+      // Small delay to let the desktop render first
+      const timer = window.setTimeout(() => {
+        import("@/utils/appEventBus").then(({ requestAppLaunch }) => {
+          requestAppLaunch({
+            appId: "finder",
+            initialData: { mode: "project", projectSlug: slug },
+          });
+        });
+      }, 400);
+      return () => window.clearTimeout(timer);
+    }
+  }, [isCoverVisible, consumePendingProject]);
 
   // Determine toast position and offset based on theme and device
   const toastConfig = useMemo(() => {
@@ -107,72 +133,7 @@ export function App() {
     }
   }, [isFirstBoot, setHasBooted]);
 
-  // Show download toast for macOS users when new desktop version is available
-  // For web: show on first visit and updates
-  // For Tauri: only show on updates (not first time)
-  useEffect(() => {
-    const isMacOS = navigator.platform.toLowerCase().includes("mac");
-    const isInTauri = isTauri();
-
-    if (!isMacOS) {
-      return;
-    }
-
-    // Handler for showing the desktop update toast
-    const showDesktopUpdateToast = (result: DesktopUpdateResult) => {
-      if (result.type === 'update' && result.version) {
-        // Mark as seen immediately so dismissing the toast won't show it again
-        setLastSeenDesktopVersion(result.version);
-        // New version available - show update toast (both web and Tauri)
-        toast(`ryOS ${result.version} for Mac is available`, {
-          id: 'desktop-update',
-          icon: <DownloadSimple className="h-4 w-4" weight="bold" />,
-          duration: Infinity,
-          action: {
-            label: "Download",
-            onClick: () => {
-              window.open(
-                `https://github.com/ryokun6/ryos/releases/download/v${result.version}/ryOS_${result.version}_aarch64.dmg`,
-                "_blank"
-              );
-            },
-          },
-        });
-      } else if (result.type === 'first-time' && result.version && !isInTauri) {
-        // Mark as seen immediately so dismissing the toast won't show it again
-        setLastSeenDesktopVersion(result.version);
-        // First time user on web - show initial download toast (not in Tauri)
-        toast("ryOS is available as a Mac app", {
-          id: 'desktop-update',
-          icon: <DownloadSimple className="h-4 w-4" weight="bold" />,
-          duration: Infinity,
-          action: {
-            label: "Download",
-            onClick: () => {
-              window.open(
-                `https://github.com/ryokun6/ryos/releases/download/v${result.version}/ryOS_${result.version}_aarch64.dmg`,
-                "_blank"
-              );
-            },
-          },
-        });
-      } else if (result.type === 'first-time' && result.version && isInTauri) {
-        // First time in Tauri - just store the version without showing toast
-        setLastSeenDesktopVersion(result.version);
-      }
-    };
-
-    // Register callback for periodic/manual update checks
-    onDesktopUpdate(showDesktopUpdateToast);
-
-    // Initial check on load (delayed to let app render first)
-    const timer = setTimeout(async () => {
-      const result = await checkDesktopUpdate();
-      showDesktopUpdateToast(result);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [setLastSeenDesktopVersion]);
+  // Desktop download toast removed — not applicable to JL OS portfolio
 
   if (showBootScreen) {
     return (
@@ -193,8 +154,14 @@ export function App() {
     <>
       <ReactScanDebug />
       <DesktopErrorBoundary>
-        <AppManager apps={apps} />
+        <AppManager
+          apps={apps}
+          customDesktop={PortfolioDesktopWrapper}
+          customMenuBar={PortfolioMenuBar}
+          customDock={PortfolioDock}
+        />
       </DesktopErrorBoundary>
+      <CoverPage />
       <Toaster position={toastConfig.position} offset={toastConfig.offset} />
       <AirDropListener />
       <ScreenSaverOverlay />

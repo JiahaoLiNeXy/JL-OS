@@ -7,7 +7,6 @@ import "./index.css";
 import { useThemeStore } from "./stores/useThemeStore";
 import { useLanguageStore } from "./stores/useLanguageStore";
 import { preloadFileSystemData } from "./stores/useFilesStore";
-import { preloadIpodData } from "./stores/useIpodStore";
 import { initPrefetch } from "./utils/prefetch";
 import { initializeI18n } from "./lib/i18n";
 import { primeReactResources } from "./lib/reactResources";
@@ -136,7 +135,6 @@ if (import.meta.hot) {
 // These run in parallel before React even mounts
 // ============================================================================
 preloadFileSystemData();
-preloadIpodData();
 
 const renderApp = () => {
   ReactDOM.createRoot(document.getElementById("root")!).render(

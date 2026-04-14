@@ -642,13 +642,22 @@ async function handleStaticRequest(pathname: string): Promise<Response | null> {
 }
 
 function validateEnv(): void {
-  const redisBackend = getRedisBackend();
+  let redisBackend: ReturnType<typeof getRedisBackend> | null = null;
+  try {
+    redisBackend = getRedisBackend();
+  } catch (error) {
+    console.warn(
+      `[api-standalone] Redis not configured. Legacy Redis-backed routes will be unavailable in local dev.\n` +
+        `  ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
   const realtimeProvider = getRealtimeProvider();
 
   const required: { name: string; description: string }[] =
     redisBackend === "redis-url"
       ? [{ name: "REDIS_URL", description: "Standard Redis connection URL" }]
-      : [
+      : redisBackend === "upstash-rest"
+        ? [
           {
             name: "REDIS_KV_REST_API_URL",
             description: "Upstash Redis REST API URL",
@@ -657,7 +666,8 @@ function validateEnv(): void {
             name: "REDIS_KV_REST_API_TOKEN",
             description: "Upstash Redis REST API token",
           },
-        ];
+        ]
+        : [];
 
   const optional: { name: string; description: string }[] = [
     { name: "OPENAI_API_KEY", description: "OpenAI API key (AI + transcription)" },
@@ -672,7 +682,7 @@ function validateEnv(): void {
       { name: "PUSHER_KEY", description: "Pusher key" },
       { name: "PUSHER_APP_ID", description: "Pusher app ID (real-time features)" }
     );
-  } else if (redisBackend !== "redis-url") {
+  } else if (redisBackend && redisBackend !== "redis-url") {
     console.warn(
       "[api-standalone] REALTIME_PROVIDER=local works best with REDIS_URL so websocket broadcasts can fan out across multiple instances. Falling back to in-process delivery only."
     );
@@ -728,7 +738,13 @@ async function bootstrap(): Promise<void> {
             runtime: "standalone-bun-serve",
             routeCount: routes.length,
             realtimeProvider: getRealtimeProvider(),
-            redisBackend: getRedisBackend(),
+            redisBackend: (() => {
+              try {
+                return getRedisBackend();
+              } catch {
+                return null;
+              }
+            })(),
           },
           200
         );

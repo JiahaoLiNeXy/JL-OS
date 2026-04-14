@@ -1192,6 +1192,51 @@ ruby.lyrics-furigana rp {
   display: none;
 }
 
+/* ------------------------------------------------------------------------- */
+/* Cover typography: explicit token-driven escape hatch from global theme     */
+/* font-size overrides.                                                        */
+/* ------------------------------------------------------------------------- */
+
+.cover-force-font .cover-social-grid,
+.cover-force-font .cover-social-grid a,
+.cover-force-font .cover-social-grid span {
+  font-size: var(--cover-social-size) !important;
+  font-family: var(--os-font-ui) !important;
+  text-shadow: var(--cover-left-shadow, none) !important;
+}
+
+.cover-force-font .cover-locale-row,
+.cover-force-font .cover-locale-row button {
+  font-size: var(--cover-locale-size) !important;
+  font-family: var(--os-font-ui) !important;
+  text-shadow: var(--cover-left-shadow, none) !important;
+}
+
+.cover-force-font .cover-identity-block,
+.cover-force-font .cover-identity-text,
+.cover-force-font .cover-cta-link {
+  font-size: var(--cover-identity-size) !important;
+  font-family: "Instrument Serif", serif !important;
+  line-height: 1.3 !important;
+  text-shadow: var(--cover-left-shadow, none) !important;
+}
+
+.cover-force-font .cover-cta-link {
+  font-size: var(--cover-cta-size) !important;
+}
+
+.cover-force-font .cover-reel-word {
+  font-size: var(--cover-reel-size) !important;
+  font-family: "Instrument Serif", serif !important;
+  line-height: 0.88 !important;
+}
+
+.cover-force-font .cover-center-word {
+  font-size: var(--cover-center-size) !important;
+  font-family: "Instrument Serif", serif !important;
+  line-height: 0.88 !important;
+}
+
 /* Bold furigana for serif and sans-serif lyrics fonts */
 .font-lyrics-serif rt.lyrics-furigana-rt,
 .font-lyrics-sans rt.lyrics-furigana-rt {
@@ -1216,3 +1261,43 @@ ruby.lyrics-furigana rp {
   font-size: clamp(14px, min(5vw, 5vh), 60px) !important;
 }
 
+/* ============================================================================
+   PORTFOLIO — Mapbox overrides
+   ============================================================================ */
+
+/* Map popup tooltip styling */
+.jl-os-map-popup .mapboxgl-popup-content {
+  background: rgba(12, 15, 22, 0.88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.jl-os-map-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(12, 15, 22, 0.88);
+}
+
+/* Portfolio pin hover popup — strip default chrome */
+.portfolio-pin-popup .mapboxgl-popup-content {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.portfolio-pin-popup .mapboxgl-popup-tip {
+  display: none;
+}
+
+/* Dim Mapbox attribution */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right,
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}

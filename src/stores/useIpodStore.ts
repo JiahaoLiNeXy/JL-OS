@@ -1641,14 +1641,9 @@ export const useIpodStore = create<IpodState>()(
         } as IpodState;
       },
       onRehydrateStorage: () => {
-        return (state, error) => {
+        return (_state, error) => {
           if (error) {
             console.error("Error rehydrating iPod store:", error);
-          } else if (state && state.libraryState === "uninitialized") {
-            // Only auto-initialize if library state is uninitialized
-            Promise.resolve(state.initializeLibrary()).catch((err) =>
-              console.error("Initialization failed on rehydrate", err)
-            );
           }
         };
       },
