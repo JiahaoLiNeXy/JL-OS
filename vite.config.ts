@@ -18,6 +18,7 @@ process.env.BROWSERSLIST_IGNORE_OLD_DATA ??= "1";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.GITHUB_PAGES ? '/JL-OS/' : '/',
   envPrefix: ['VITE_', 'TAURI_ENV_*'],
   define: {
     // Expose VERCEL_ENV to the client for environment detection
