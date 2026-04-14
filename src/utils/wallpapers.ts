@@ -1,6 +1,7 @@
 // Utility for loading wallpaper manifest at /wallpapers/manifest.json
 // Similar approach to icons.ts
 import { abortableFetch } from "./abortableFetch";
+import { withBase } from "./base";
 
 export interface WallpaperManifest {
   version: number;
@@ -19,7 +20,7 @@ export async function loadWallpaperManifest(): Promise<WallpaperManifest> {
     // Bypass HTTP caches to ensure we always see the newest manifest.
     // Server headers also set no-cache for this file, but this defends against
     // any intermediary or conflicting rules.
-    manifestPromise = abortableFetch("/wallpapers/manifest.json", {
+    manifestPromise = abortableFetch(withBase("/wallpapers/manifest.json"), {
       cache: "no-store",
       timeout: 15000,
       retry: { maxAttempts: 1, initialDelayMs: 250 },

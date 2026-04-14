@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { withBase } from "@/utils/base";
 import { ShaderType } from "@/types/shader";
 import { DisplayMode } from "@/utils/displayMode";
 import { checkShaderPerformance } from "@/utils/performanceCheck";
@@ -129,8 +130,8 @@ export const useDisplaySettingsStore = create<DisplaySettingsState>()(
       setSelectedShaderType: (t) => set({ selectedShaderType: t }),
 
       // Wallpaper
-      currentWallpaper: "/wallpapers/photos/aqua/water.jpg",
-      wallpaperSource: "/wallpapers/photos/aqua/water.jpg",
+      currentWallpaper: withBase("/wallpapers/photos/aqua/water.jpg"),
+      wallpaperSource: withBase("/wallpapers/photos/aqua/water.jpg"),
       setCurrentWallpaper: (p) => set({ currentWallpaper: p, wallpaperSource: p }),
 
       setWallpaper: async (path) => {
@@ -207,8 +208,8 @@ export const useDisplaySettingsStore = create<DisplaySettingsState>()(
           }
           if (get().currentWallpaper === reference) {
             set({
-              currentWallpaper: "/wallpapers/photos/aqua/water.jpg",
-              wallpaperSource: "/wallpapers/photos/aqua/water.jpg",
+              currentWallpaper: withBase("/wallpapers/photos/aqua/water.jpg"),
+              wallpaperSource: withBase("/wallpapers/photos/aqua/water.jpg"),
             });
           }
           get().bumpCustomWallpapersRevision();

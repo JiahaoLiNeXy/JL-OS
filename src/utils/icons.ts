@@ -2,6 +2,7 @@
 // Generated manifest: public/icons/manifest.json
 // Initial implementation supports only the 'default' theme.
 import { abortableFetch } from "./abortableFetch";
+import { withBase } from "./base";
 //
 // Note: Icon cache busting via ?v= query params was removed because:
 // 1. Service worker uses ignoreSearch: true for images (query params are ignored)
@@ -20,7 +21,7 @@ let manifestPromise: Promise<IconManifest> | null = null;
 async function loadManifest(): Promise<IconManifest> {
   if (manifestCache) return manifestCache;
   if (!manifestPromise) {
-    manifestPromise = abortableFetch("/icons/manifest.json", {
+    manifestPromise = abortableFetch(withBase("/icons/manifest.json"), {
       cache: "no-store",
       timeout: 15000,
       retry: { maxAttempts: 1, initialDelayMs: 250 },
@@ -58,22 +59,22 @@ export function pickIconPath(
 ): string {
   // No theme provided: always fallback.
   if (!theme) {
-    return `/icons/${fallbackTheme}/${name}`;
+    return withBase(`/icons/${fallbackTheme}/${name}`);
   }
   // If theme explicitly equals fallback, just return fallback path.
   if (theme === fallbackTheme) {
-    return `/icons/${fallbackTheme}/${name}`;
+    return withBase(`/icons/${fallbackTheme}/${name}`);
   }
   const m = manifestCache || manifest; // allow pre-supplied
   // If manifest not yet loaded, optimistically return themed path to avoid flash.
   if (!m) {
-    return `/icons/${theme}/${name}`;
+    return withBase(`/icons/${theme}/${name}`);
   }
   if (m.themes[theme] && m.themes[theme].includes(name)) {
-    return `/icons/${theme}/${name}`;
+    return withBase(`/icons/${theme}/${name}`);
   }
   // Fallback if manifest knows the theme or icon missing.
-  return `/icons/${fallbackTheme}/${name}`;
+  return withBase(`/icons/${fallbackTheme}/${name}`);
 }
 
 // React helper hook (lazy, no suspense) to resolve icon path.
